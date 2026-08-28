@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ayak — Smart Agriculture &amp; IoT Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:            #0f0f11;
+      --bg-card:       #13131a;
+      --bg-elevated:   #1a1a26;
+      --border:        rgba(255,255,255,0.07);
+      --border-hi:     rgba(34,211,238,0.2);
+      --text-1:        #f1f5f9;
+      --text-2:        #94a3b8;
+      --text-3:        #475569;
+      --green:         #4ade80;
+      --green-dim:     rgba(74,222,128,0.08);
+      --cyan:          #22d3ee;
+      --cyan-dim:      rgba(34,211,238,0.08);
+      --violet:        #a78bfa;
+      --violet-dim:    rgba(167,139,250,0.08);
+      --gold:          #fbbf24;
+      --font:          'Inter', system-ui, sans-serif;
+      --mono:          'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: var(--font);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--cyan); border-radius: 3px; }
+
+    /* ── NAVBAR ── */
+    #navbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      height: 64px;
+      padding: 0 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(15,15,17,0.65);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.35s, border-color 0.35s, box-shadow 0.35s;
+    }
+    #navbar.scrolled {
+      background: rgba(15,15,17,0.96);
+      border-color: rgba(255,255,255,0.09);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo {
+      width: 80px; height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .nav-logo img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+    .nav-wordmark {
+      font-weight: 750; font-size: 1.05rem;
+      color: var(--text-1); letter-spacing: -.3px;
+    }
+    .nav-links {
+      list-style: none;
+      display: flex; align-items: center; gap: .15rem;
+    }
+    .nav-links a {
+      display: inline-block;
+      color: var(--text-2); text-decoration: none;
+      font-size: .85rem; font-weight: 500;
+      padding: 6px 13px; border-radius: 7px;
+      transition: color .2s, background .2s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--text-1); background: rgba(255,255,255,0.06); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--green), var(--cyan)) !important;
+      color: #0f0f11 !important; font-weight: 700 !important;
+      padding: 7px 17px !important;
+    }
+    .nav-cta:hover { opacity: .88; background: linear-gradient(135deg, var(--green), var(--cyan)) !important; }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 5vw 5rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(34,211,238,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34,211,238,.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .hero-glow {
+      position: absolute; pointer-events: none;
+      width: 700px; height: 700px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(74,222,128,.07) 0%, transparent 65%);
+      top: 50%; left: 50%; transform: translate(-50%,-56%);
+    }
+    .hero-glow-2 {
+      position: absolute; pointer-events: none;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(34,211,238,.05) 0%, transparent 65%);
+      top: 40%; left: 60%;
+    }
+
+    .hero-badge {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(251,191,36,.09);
+      border: 1px solid rgba(251,191,36,.28);
+      color: var(--gold);
+      font-size: .7rem; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+    .badge-pulse {
+      width: 6px; height: 6px; background: var(--gold);
+      border-radius: 50%; animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.75)} }
+
+    .hero-title {
+      position: relative;
+      font-size: clamp(2.4rem, 6vw, 5.2rem);
+      font-weight: 900; line-height: 1.06;
+      letter-spacing: -.035em; margin-bottom: 1.5rem;
+    }
+    .grad-green {
+      background: linear-gradient(130deg, var(--green), #86efac);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .grad-cyan {
+      background: linear-gradient(130deg, var(--cyan), #67e8f9);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    .hero-desc {
+      position: relative;
+      font-size: clamp(.95rem, 1.8vw, 1.15rem);
+      color: var(--text-2); max-width: 680px;
+      margin: 0 auto 2rem; line-height: 1.75;
+    }
+
+    .vision-pill {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--green-dim);
+      border: 1px solid rgba(74,222,128,.16);
+      border-radius: 12px; padding: 11px 18px;
+      margin-bottom: 3rem;
+      font-size: .85rem; color: var(--text-2);
+    }
+    .vision-pill svg { color: var(--green); flex-shrink: 0; }
+    .vision-pill strong { color: var(--green); }
+
+    .hero-stats {
+      position: relative;
+      display: flex; gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+      margin-bottom: 2.5rem; width: 100%; max-width: 720px;
+    }
+    .stat {
+      flex: 1; padding: 1.2rem 1.5rem;
+      background: var(--bg-card); text-align: center;
+    }
+    .stat-val {
+      font-size: 1.55rem; font-weight: 800;
+      font-family: var(--mono); letter-spacing: -.04em;
+      background: linear-gradient(130deg, var(--cyan), var(--green));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .stat-lbl {
+      font-size: .68rem; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: .06em; margin-top: 3px;
+    }
+
+    .hero-actions {
+      position: relative;
+      display: flex; gap: .85rem; flex-wrap: wrap; justify-content: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 22px; border-radius: 9px;
+      font-size: .88rem; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: transform .2s, box-shadow .2s, opacity .2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #0f0f11;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(74,222,128,.3); }
+    .btn-ghost {
+      background: transparent; color: var(--text-1);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.15); transform: translateY(-2px); }
+
+    .scroll-hint {
+      position: absolute; bottom: 1.75rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      color: var(--text-3); font-size: .62rem; text-transform: uppercase; letter-spacing: .14em;
+      animation: bob 3s ease-in-out infinite;
+    }
+    .scroll-hint-line {
+      width: 1px; height: 34px;
+      background: linear-gradient(to bottom, transparent, var(--cyan));
+    }
+    @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(7px)} }
+
+    /* ── HARDWARE SECTION ── */
+    #hardware {
+      height: 100vh;
+      position: relative;
+      background: var(--bg);
+    }
+    /* Top progress bar */
+    .hw-topbar {
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; z-index: 20;
+      background: rgba(255,255,255,.05);
+    }
+    .hw-topbar-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      transition: none;
+    }
+
+    .hw-wrapper {
+      position: relative; width: 100%; height: 100%;
+      overflow: hidden;
+      perspective: 1200px;
+      perspective-origin: 50% 50%;
+    }
+
+    /* Individual panels */
+    .hw-panel {
+      position: absolute; inset: 0;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 4vw;
+      padding: 80px 7vw 3rem;
+    }
+
+    /* ── Panel text side ── */
+    .hw-text { display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .hw-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .15em;
+      color: var(--cyan);
+    }
+    .hw-eyebrow::before { content:''; width: 18px; height: 1px; background: currentColor; }
+
+    .hw-index {
+      font-family: var(--mono); font-size: .65rem;
+      color: var(--text-3); letter-spacing: .1em;
+    }
+
+    .hw-name {
+      font-size: clamp(1.6rem, 3vw, 2.6rem);
+      font-weight: 850; line-height: 1.12; letter-spacing: -.025em;
+    }
+    .hw-name span { display: block; }
+
+    .hw-body {
+      font-size: .96rem; color: var(--text-2);
+      line-height: 1.75; max-width: 480px;
+    }
+
+    /* Spec grid */
+    .hw-specs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .7rem;
+      margin-top: .25rem;
+    }
+    .spec {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 13px;
+      transition: border-color .25s;
+    }
+    .spec:hover { border-color: var(--border-hi); }
+    .spec-ico {
+      width: 28px; height: 28px; border-radius: 6px;
+      display: grid; place-items: center;
+      font-size: .85rem; flex-shrink: 0;
+    }
+    .spec-t { font-size: .78rem; font-weight: 600; color: var(--text-1); }
+    .spec-v { font-size: .68rem; color: var(--text-3); font-family: var(--mono); margin-top: 1px; }
+
+    /* ── Panel image side ── */
+    .hw-img-wrap { display: flex; align-items: center; justify-content: center; }
+    .hw-frame {
+      position: relative; width: 100%; max-width: 470px;
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.12s ease-out, box-shadow 0.12s ease-out;
+    }
+    .hw-frame::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(135deg, rgba(34,211,238,.04), transparent 55%);
+      z-index: 1;
+    }
+    .hw-frame-img {
+      display: block; width: 100%;
+      aspect-ratio: 4/3; object-fit: contain;
+      padding: .75rem; background: var(--bg-card);
+      transform: translateZ(18px);
+    }
+    .hw-img-tag {
+      position: absolute; top: 14px; right: 14px; z-index: 2;
+      background: rgba(15,15,17,.82); backdrop-filter: blur(8px);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 4px 10px; font-size: .62rem;
+      font-family: var(--mono); font-weight: 500;
+    }
+
+    /* Per-panel accent colours */
+    .panel-1 .hw-name       { background: linear-gradient(130deg, var(--cyan), #a5f3fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .panel-1 .hw-eyebrow    { color: var(--cyan); }
+    .panel-1 .hw-img-tag    { color: var(--cyan); }
+    .panel-1 .spec-ico      { background: var(--cyan-dim); }
+
+    .panel-2 .hw-name       { background: linear-gradient(130deg, var(--green), #bbf7d0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .panel-2 .hw-eyebrow    { color: var(--green); }
+    .panel-2 .hw-eyebrow::before { background: var(--green); }
+    .panel-2 .hw-img-tag    { color: var(--green); }
+    .panel-2 .spec-ico      { background: var(--green-dim); }
+
+    .panel-3 .hw-name       { background: linear-gradient(130deg, var(--violet), #c4b5fd); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .panel-3 .hw-eyebrow    { color: var(--violet); }
+    .panel-3 .hw-eyebrow::before { background: var(--violet); }
+    .panel-3 .hw-img-tag    { color: var(--violet); }
+    .panel-3 .spec-ico      { background: var(--violet-dim); }
+
+    /* Progress dots */
+    .hw-dots {
+      position: absolute; bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      display: flex; gap: 7px; z-index: 20;
+    }
+    .hw-dot {
+      width: 6px; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,.15);
+      transition: width .35s, background .35s;
+    }
+    .hw-dot.active { width: 22px; background: var(--cyan); }
+
+    .hw-scroll-label {
+      position: absolute; right: 1.5rem; top: 50%;
+      transform: translateY(-50%) rotate(90deg);
+      font-size: .6rem; text-transform: uppercase;
+      letter-spacing: .16em; color: var(--text-3);
+      display: flex; align-items: center; gap: 7px; z-index: 20;
+    }
+    .hw-scroll-label::after { content:''; width: 28px; height: 1px; background: currentColor; }
+
+    /* ── FOOTER ── */
+    #footer {
+      padding: 5rem 7vw;
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+    }
+    .footer-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem;
+    }
+    .footer-brand {
+      margin-bottom: .6rem;
+    }
+    .footer-brand img {
+      width: 120px; height: 120px;
+      object-fit: contain;
+    }
+    .footer-tagline {
+      font-size: .85rem; color: var(--text-3); line-height: 1.7; max-width: 280px;
+    }
+    .footer-v2030 {
+      display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 1.2rem;
+      background: rgba(251,191,36,.07);
+      border: 1px solid rgba(251,191,36,.22);
+      color: var(--gold);
+      font-size: .68rem; font-weight: 700; letter-spacing: .04em;
+      padding: 5px 11px; border-radius: 6px;
+    }
+    .footer-col-hd {
+      font-size: .68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em; color: var(--text-3); margin-bottom: .9rem;
+    }
+    .footer-list { list-style: none; display: flex; flex-direction: column; gap: .55rem; }
+    .footer-list a {
+      text-decoration: none; font-size: .85rem;
+      color: var(--text-2); transition: color .2s;
+    }
+    .footer-list a:hover { color: var(--cyan); }
+    .footer-bottom {
+      max-width: 1200px; margin: 2.5rem auto 0;
+      padding-top: 1.75rem; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: .78rem; color: var(--text-3);
+    }
+    .status-pill { display: flex; align-items: center; gap: 6px; }
+    .status-dot {
+      width: 6px; height: 6px; background: var(--green);
+      border-radius: 50%; animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    /* ── INITIAL STATES FOR GSAP ── */
+    .anim-up { opacity: 0; transform: translateY(24px); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 820px) {
+      .hw-panel { grid-template-columns: 1fr; padding: 80px 5vw 5rem; gap: 2rem; }
+      .hw-img-wrap { order: -1; }
+      .hw-frame { max-width: 380px; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .hero-stats { flex-wrap: wrap; }
+      .stat { min-width: 140px; }
+    }
+    @media (max-width: 540px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .hw-specs { grid-template-columns: 1fr; }
+      .nav-links li:not(:last-child) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║         NAVIGATION          ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <nav id="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-logo">
+        <img src="ayak_logo_1_shield_wifi_transparent.png" alt="Ayak logo" />
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="#hardware">Hardware</a></li>
+      <li><a href="team.html">Team</a></li>
+      <li><a href="team.html" class="btn nav-cta">Meet the Team</a></li>
+    </ul>
+  </nav>
+
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║            HERO              ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <section id="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow-2"></div>
+
+    <div class="hero-badge anim-up">
+      <span class="badge-pulse"></span>
+      Aligned with Saudi Vision 2030
+    </div>
+
+    <h1 class="hero-title anim-up">
+      Intelligent Farming<br>
+      <span class="grad-green">Powered by IoT</span> &amp;<br>
+      <span class="grad-cyan">LoRa Technology</span>
+    </h1>
+
+    <p class="hero-desc anim-up">
+      Ayak is a next-generation smart agriculture platform leveraging LoRaWAN wireless sensors,
+      real-time soil monitoring, and edge computing to optimize water usage and maximize crop
+      yields — directly supporting Saudi Arabia's sustainability and food-security goals.
+    </p>
+
+    <div class="vision-pill anim-up">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Supporting&nbsp;<strong>Vision 2030</strong>&nbsp;— Water Sustainability &amp; Smart Farming
+    </div>
+
+    <div class="hero-stats anim-up">
+      <div class="stat">
+        <div class="stat-val">LoRa</div>
+        <div class="stat-lbl">Long-Range Wireless</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">IP65</div>
+        <div class="stat-lbl">Weatherproof Sensors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">240MHz</div>
+        <div class="stat-lbl">Dual-Core MCU</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">15km</div>
+        <div class="stat-lbl">Gateway Coverage</div>
+      </div>
+    </div>
+
+    <div class="hero-actions anim-up">
+      <a href="#hardware" class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+        Explore Hardware
+      </a>
+      <a href="team.html" class="btn btn-ghost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Meet the Team
+      </a>
+    </div>
+
+    <div class="scroll-hint anim-up">
+      Scroll
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+
+  <!-- ╔══════════════════════════════════════════╗ -->
+  <!-- ║    HARDWARE SCROLLYTELLING SECTION       ║ -->
+  <!-- ╚══════════════════════════════════════════╝ -->
+  <section id="hardware">
+    <!-- Top progress bar -->
+    <div class="hw-topbar"><div class="hw-topbar-fill" id="hw-fill"></div></div>
+
+    <div class="hw-wrapper">
+
+      <!-- ── Panel 1: Heltec ESP32 LoRa V3 ── -->
+      <div class="hw-panel panel-1" id="hw-p1">
+        <div class="hw-text">
+          <span class="hw-eyebrow">Hardware Node 01 / 03</span>
+          <div class="hw-index">MICROCONTROLLER UNIT</div>
+          <h2 class="hw-name">
+            <span>Heltec</span>
+            <span>ESP32 LoRa V3</span>
+          </h2>
+          <p class="hw-body">
+            The brain of every field node. It fuses Espressif's dual-core ESP32-S3 with an integrated
+            SX1262 LoRa transceiver and a built-in 0.96″ OLED display — enabling real-time sensor
+            data collection, local display readouts, and long-range wireless uplinks without any
+            additional hardware.
+          </p>
+          <div class="hw-specs">
+            <div class="spec">
+              <div class="spec-ico">⚡</div>
+              <div>
+                <div class="spec-t">Dual-Core CPU</div>
+                <div class="spec-v">240 MHz Xtensa LX7</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">📡</div>
+              <div>
+                <div class="spec-t">LoRa Chip</div>
+                <div class="spec-v">SX1262 · 868 / 915 MHz</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🖥️</div>
+              <div>
+                <div class="spec-t">OLED Display</div>
+                <div class="spec-v">0.96″ 128×64 SSD1306</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🔋</div>
+              <div>
+                <div class="spec-t">RAM / Flash</div>
+                <div class="spec-v">520 KB SRAM · 8 MB Flash</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">📶</div>
+              <div>
+                <div class="spec-t">Wireless</div>
+                <div class="spec-v">Wi-Fi 802.11 b/g/n + BLE 5</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🔌</div>
+              <div>
+                <div class="spec-t">GPIO Pins</div>
+                <div class="spec-v">36 programmable I/O</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hw-img-wrap">
+          <div class="hw-frame">
+            <img
+              class="hw-frame-img"
+              src="heltec esp32 lora v3.png"
+              alt="Heltec ESP32 LoRa V3 microcontroller board"
+            />
+            <div class="hw-img-tag">MCU · LoRa Node</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Panel 2: DFRobot EU868 Gateway ── -->
+      <div class="hw-panel panel-2" id="hw-p2">
+        <div class="hw-text">
+          <span class="hw-eyebrow">Hardware Node 02 / 03</span>
+          <div class="hw-index">LORAWAN GATEWAY</div>
+          <h2 class="hw-name">
+            <span>DFRobot</span>
+            <span>EU868 Gateway</span>
+          </h2>
+          <p class="hw-body">
+            The network backbone of the Ayak system. The DFRobot EU868 LoRaWAN Gateway bridges
+            hundreds of field-deployed sensor nodes directly to the cloud over a 15 km line-of-sight
+            radius — while consuming minimal power and supporting solar-panel operation for fully
+            off-grid deployments.
+          </p>
+          <div class="hw-specs">
+            <div class="spec">
+              <div class="spec-ico">📡</div>
+              <div>
+                <div class="spec-t">Frequency Band</div>
+                <div class="spec-v">EU868 MHz · LoRaWAN</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">📏</div>
+              <div>
+                <div class="spec-t">Coverage Range</div>
+                <div class="spec-v">Up to 15 km (LoS)</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🔗</div>
+              <div>
+                <div class="spec-t">End-Devices</div>
+                <div class="spec-v">1 000+ simultaneous nodes</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🌐</div>
+              <div>
+                <div class="spec-t">Backhaul</div>
+                <div class="spec-v">Ethernet + 4G LTE option</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">⚙️</div>
+              <div>
+                <div class="spec-t">Protocol</div>
+                <div class="spec-v">LoRaWAN v1.0.2 / 1.0.3</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🌿</div>
+              <div>
+                <div class="spec-t">Power Supply</div>
+                <div class="spec-v">DC 12 V · Solar Compatible</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hw-img-wrap">
+          <div class="hw-frame">
+            <img
+              class="hw-frame-img"
+              src="dfrobot gateway eu868.png"
+              alt="DFRobot EU868 LoRaWAN Gateway"
+            />
+            <div class="hw-img-tag">Gateway · LoRaWAN</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Panel 3: Gravity IP65 Soil Moisture Sensor ── -->
+      <div class="hw-panel panel-3" id="hw-p3">
+        <div class="hw-text">
+          <span class="hw-eyebrow">Hardware Node 03 / 03</span>
+          <div class="hw-index">FIELD SENSOR</div>
+          <h2 class="hw-name">
+            <span>Gravity: IP65</span>
+            <span>Soil Moisture Sensor</span>
+          </h2>
+          <p class="hw-body">
+            The eyes of the system. This capacitive soil moisture sensor is deployed directly in the
+            earth, delivering corrosion-free, precise volumetric water content readings over its
+            gold-plated ENIG probe. The IP65 waterproof rating guarantees reliable readings through
+            seasons of rain, irrigation, and harsh desert conditions.
+          </p>
+          <div class="hw-specs">
+            <div class="spec">
+              <div class="spec-ico">💧</div>
+              <div>
+                <div class="spec-t">Technology</div>
+                <div class="spec-v">Capacitive · No electrolysis</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🛡️</div>
+              <div>
+                <div class="spec-t">Protection</div>
+                <div class="spec-v">IP65 Waterproof rated</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">📊</div>
+              <div>
+                <div class="spec-t">Output Signal</div>
+                <div class="spec-v">0 – 2.3 V Analog (10-bit)</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🌡️</div>
+              <div>
+                <div class="spec-t">Operating Temp</div>
+                <div class="spec-v">−40 °C to +85 °C</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">⚡</div>
+              <div>
+                <div class="spec-t">Supply Voltage</div>
+                <div class="spec-v">3.3 V – 5.5 V DC</div>
+              </div>
+            </div>
+            <div class="spec">
+              <div class="spec-ico">🔩</div>
+              <div>
+                <div class="spec-t">Probe Finish</div>
+                <div class="spec-v">ENIG Gold-plated · Anti-corrosion</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hw-img-wrap">
+          <div class="hw-frame">
+            <img
+              class="hw-frame-img"
+              src="Gravity IP65 Capacitive Soil Moisture.png"
+              alt="Gravity IP65 Capacitive Soil Moisture Sensor"
+            />
+            <div class="hw-img-tag">Sensor · IP65</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress dots -->
+      <div class="hw-dots" id="hw-dots">
+        <div class="hw-dot active"></div>
+        <div class="hw-dot"></div>
+        <div class="hw-dot"></div>
+      </div>
+
+      <!-- Side label -->
+      <div class="hw-scroll-label">Scroll to explore</div>
+    </div>
+  </section>
+
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║           FOOTER             ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <footer id="footer">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand">
+          <img src="ayak_logo_1_shield_wifi_transparent.png" alt="Ayak logo" />
+        </div>
+        <p class="footer-tagline">
+          A smart agriculture IoT platform built to revolutionize water usage and crop monitoring
+          across Saudi Arabia's agricultural sector.
+        </p>
+        <div class="footer-v2030">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          Saudi Vision 2030 — Sustainability
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-hd">Project</div>
+        <ul class="footer-list">
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="#hardware">Hardware</a></li>
+          <li><a href="team.html">Team</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-hd">Hardware</div>
+        <ul class="footer-list">
+          <li><a href="#hardware">ESP32 LoRa V3</a></li>
+          <li><a href="#hardware">EU868 Gateway</a></li>
+          <li><a href="#hardware">IP65 Soil Sensor</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-hd">Goals</div>
+        <ul class="footer-list">
+          <li><a href="#">Water Efficiency</a></li>
+          <li><a href="#">Smart Monitoring</a></li>
+          <li><a href="#">Sustainability</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Ayak Project · IoT Smart Agriculture · Saudi Arabia</span>
+      <div class="status-pill">
+        <div class="status-dot"></div>
+        System Operational
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ╔══════════════════════════════╗ -->
+  <!-- ║        GSAP ANIMATIONS       ║ -->
+  <!-- ╚══════════════════════════════╝ -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ── Navbar scroll state ── */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    /* ── Hero entrance ── */
+    gsap.to('.anim-up', {
+      opacity: 1, y: 0,
+      duration: 0.75,
+      ease: 'power3.out',
+      stagger: 0.1,
+      delay: 0.25,
+    });
+
+    /* ── Smooth anchor scroll ── */
+    document.querySelectorAll('a[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        const id = link.getAttribute('href');
+        const target = document.querySelector(id);
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      });
+    });
+
+    /* ══════════════════════════════════════════════
+       HARDWARE SCROLLYTELLING — Pin + Panel Wipe
+       ══════════════════════════════════════════════ */
+    const panels   = [
+      document.getElementById('hw-p1'),
+      document.getElementById('hw-p2'),
+      document.getElementById('hw-p3'),
+    ];
+    const dots     = document.querySelectorAll('.hw-dot');
+    const fillBar  = document.getElementById('hw-fill');
+
+    /* Position panels 2 and 3 off-screen with 3D rotation */
+    gsap.set(panels[1], { rotationY: 90, opacity: 0, scale: 0.9, transformOrigin: 'left center' });
+    gsap.set(panels[2], { rotationY: 90, opacity: 0, scale: 0.9, transformOrigin: 'left center' });
+
+    /* Update progress widgets */
+    function setActive(idx) {
+      dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+    }
+
+    /*
+      Timeline structure (units are arbitrary "scroll units"):
+        1.5  → dwell on panel 1
+        1.0  → slide panel 1 out / panel 2 in  (parallel)
+        1.5  → dwell on panel 2
+        1.0  → slide panel 2 out / panel 3 in  (parallel)
+        1.5  → dwell on panel 3
+      Total = 6.5 scroll units → mapped to 4 × vh scroll distance
+    */
+    const hwTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '#hardware',
+        start: 'top top',
+        end: () => `+=${window.innerHeight * 4}`,
+        pin: true,
+        scrub: 1,
+        anticipatePin: 1,
+        onUpdate(self) {
+          /* Top fill bar */
+          fillBar.style.width = `${self.progress * 100}%`;
+          /* Dot indicator thresholds based on timeline proportions */
+          const p = self.progress;
+          if      (p < 0.35) setActive(0);
+          else if (p < 0.70) setActive(1);
+          else               setActive(2);
+        },
+      },
+    });
+
+    hwTl
+      /* Dwell — read panel 1 */
+      .to({}, { duration: 1.5 })
+      /* Transition 1 → 2 */
+      .to(panels[0],  { rotationY: -90, opacity: 0, scale: 0.9, transformOrigin: 'right center', duration: 1, ease: 'power2.inOut' })
+      .to(panels[1],  { rotationY:   0, opacity: 1, scale: 1.0, transformOrigin: 'left center',  duration: 1, ease: 'power2.inOut' }, '<')
+      /* Dwell — read panel 2 */
+      .to({}, { duration: 1.5 })
+      /* Transition 2 → 3 */
+      .to(panels[1],  { rotationY: -90, opacity: 0, scale: 0.9, transformOrigin: 'right center', duration: 1, ease: 'power2.inOut' })
+      .to(panels[2],  { rotationY:   0, opacity: 1, scale: 1.0, transformOrigin: 'left center',  duration: 1, ease: 'power2.inOut' }, '<')
+      /* Dwell — read panel 3 */
+      .to({}, { duration: 1.5 });
+
+    /* Refresh ScrollTrigger on resize */
+    window.addEventListener('resize', () => ScrollTrigger.refresh());
+
+    /* ── Hardware card mouse-tilt ── */
+    document.querySelectorAll('.hw-frame').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        const cx   = rect.left + rect.width  / 2;
+        const cy   = rect.top  + rect.height / 2;
+        const dx   = (e.clientX - cx) / (rect.width  / 2);  /* -1 … +1 */
+        const dy   = (e.clientY - cy) / (rect.height / 2);  /* -1 … +1 */
+        card.style.transform =
+          `perspective(800px) rotateY(${dx * 12}deg) rotateX(${-dy * 8}deg) scale(1.025)`;
+        card.style.boxShadow =
+          `${-dx * 18}px ${dy * 14}px 40px rgba(34,211,238,0.14)`;
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+        card.style.boxShadow = '';
+      });
+    });
+  </script>
+</body>
+</html>
